@@ -19,12 +19,9 @@ ScrollableText::~ScrollableText()
 void ScrollableText::update(const Uint8 *keystate)
 {
 	if (keystate[SDL_SCANCODE_DOWN])
-		_text_y -= 0.05;
+		move_text_y(-0.05);
 	if (keystate[SDL_SCANCODE_UP])
-		_text_y += 0.05;
-
-	_text_y = _text_y > 0 ? 0 : _text_y;
-	_text_y = _text_y < 0 - (_text_height - _height) ? 0 - (_text_height - _height) : _text_y;
+		move_text_y(0.05);
 }
 
 void ScrollableText::render(int x_pos, int y_pos)
@@ -60,4 +57,13 @@ bool ScrollableText::get_texture(std::string text) {
 			return true;
 	}
 	return false;
+}
+
+void ScrollableText::move_text_y(double y_diff)
+{
+	_text_y += y_diff;
+	if (_text_y > 0)
+		_text_y = 0;
+	else if (_text_y < _height - _text_height)
+		_text_y = _height - _text_height;		
 }
