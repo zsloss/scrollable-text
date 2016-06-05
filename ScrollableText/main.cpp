@@ -24,11 +24,12 @@ int main(int argc, char* argv[]) {
 
 	bool quit = false;
 	bool in_1 = false, in_2 = false;
+	
 
 	SDL_Event e;
 	if (init()) {
 		while (!quit) {
-
+			int mousewheel = 0;
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
 					quit = true;
@@ -45,14 +46,16 @@ int main(int argc, char* argv[]) {
 						}
 					else { in_1 = false; in_2 = false; }
 				}
+				else if (e.type == SDL_MOUSEWHEEL)
+					mousewheel = e.wheel.y;
 			}
 
 			const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
 			if (in_1)
-				scrollable_text1->update(keystate);
+				scrollable_text1->update(keystate, mousewheel);
 			else if (in_2)
-				scrollable_text2->update(keystate);
+				scrollable_text2->update(keystate, mousewheel);
 
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);

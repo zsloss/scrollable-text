@@ -16,12 +16,14 @@ ScrollableText::~ScrollableText()
 	_texture = nullptr;
 }
 
-void ScrollableText::update(const Uint8 *keystate)
+void ScrollableText::update(const Uint8 *keystate, int mousewheel)
 {
 	if (keystate[SDL_SCANCODE_DOWN])
 		move_text_y(-0.05);
 	if (keystate[SDL_SCANCODE_UP])
 		move_text_y(0.05);
+	if (mousewheel != 0)
+	move_text_y(mousewheel * 30);
 }
 
 void ScrollableText::render(int x_pos, int y_pos)
