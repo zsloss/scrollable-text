@@ -24,8 +24,6 @@ namespace utils {
 					char_map[glyph] = { x, y, w, h };
 				}
 			}
-
-			file.close();
 		}
 
 		return char_map;
