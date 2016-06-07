@@ -1,21 +1,19 @@
 #include <SDL.h>
-#include <SDL_ttf.h>
 #include <cstdio>
 #include <string>
 #include "ScrollableText.h"
 #include <memory>
+#include <SDL_image.h>
 
 const int SCREEN_WIDTH = 400, SCREEN_HEIGHT = 300;
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
-TTF_Font *font = nullptr;
 SDL_Texture *texture = nullptr;
 std::shared_ptr<ScrollableText> scrollable_text1;
 std::shared_ptr<ScrollableText> scrollable_text2;
 
 bool init();
-bool init_font();
 std::string get_lorem_ipsum();
 void cleanup();
 
@@ -24,7 +22,7 @@ int main(int argc, char* argv[]) {
 
 	bool quit = false;
 	bool in_1 = false, in_2 = false;
-	
+
 
 	SDL_Event e;
 	if (init()) {
@@ -74,35 +72,24 @@ int main(int argc, char* argv[]) {
 bool init() {
 	if (SDL_Init(SDL_INIT_VIDEO) != -1)
 		if (window = SDL_CreateWindow("Zac's Amazing Scrollable Text!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN))
-			if (renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
-				if (init_font()) {
-					scrollable_text1 = std::make_shared<ScrollableText>(renderer, font, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+			if (renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {
+				int imgFlags = IMG_INIT_PNG;
+				if (IMG_Init(imgFlags) & imgFlags)	{
+					scrollable_text1 = std::make_shared<ScrollableText>(renderer, "nova", SCREEN_WIDTH / 2, SCREEN_HEIGHT);
 					scrollable_text1->set_text(get_lorem_ipsum());
-					scrollable_text2 = std::make_shared<ScrollableText>(renderer, font, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+					scrollable_text2 = std::make_shared<ScrollableText>(renderer, "nova", SCREEN_WIDTH / 2, SCREEN_HEIGHT);
 					scrollable_text2->set_text(get_lorem_ipsum());
 					return true;
 				}
-				else printf("Get renderer error: %s\n", SDL_GetError());
-			else printf("Create window error: %s\n", SDL_GetError());
-			return false;
-}
-
-bool init_font() {
-	if (TTF_Init() == 0)
-		if (font = TTF_OpenFont("OpenSans-Regular.ttf", 16))
-			return true;
-		else
-			printf("TTF_OpenFont error: %s", TTF_GetError());
-	else
-		printf("TTF_Init error: %s", TTF_GetError());
-
-	return false;
+				else printf("IMG_Init error: %s\n", IMG_GetError());
+			}
+			else printf("Get renderer error: %s\n", SDL_GetError());
+		else printf("Create window error: %s\n", SDL_GetError());
+		return false;
 }
 
 void cleanup() {
 	scrollable_text1 = nullptr;
-	TTF_CloseFont(font);
-	font = nullptr;
 	SDL_DestroyRenderer(renderer);
 	renderer = nullptr;
 	SDL_DestroyWindow(window);

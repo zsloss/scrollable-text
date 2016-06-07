@@ -1,13 +1,16 @@
 #include "IWidget.h"
 #include "ScrollableText.h"
 #include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL_image.h>
+#include "Utils.h"
 
-ScrollableText::ScrollableText(SDL_Renderer *renderer, TTF_Font *font, int width, int height) : IWidget(width, height)
+ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int width, int height) : IWidget(width, height)
 {
 	_renderer = renderer;
-	_font = font;
 	_texture = nullptr;
+	_font = nullptr;
+	load_font_texture(font + ".png");
+	_font_coords = utils::get_glyph_coords(font + ".fnt");
 }
 
 ScrollableText::~ScrollableText()
@@ -45,19 +48,17 @@ void ScrollableText::set_text(std::string text)
 }
 
 bool ScrollableText::get_texture(std::string text) {
-	SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(_font, text.c_str(), { 0, 0, 0 }, _width);
-	if (surface == nullptr)
-		printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-	else {
-		_texture = SDL_CreateTextureFromSurface(_renderer, surface);
-		_text_width = surface->w;
-		_text_height = surface->h;
-		SDL_FreeSurface(surface);
-		if (_texture == nullptr)
-			printf("Unable to create texture: %s\n", SDL_GetError());
-		else
-			return true;
-	}
+	SDL_Rect source = _font_coords['C'];
+	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, source.w, source.h);
+	SDL_SetRenderTarget(_renderer, _texture);
+
+	SDL_Rect dest = { 0,0,source.w, source.h };
+	SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderFillRect(_renderer, &dest);
+	SDL_RenderCopy(_renderer, _font, &source, &dest);
+	_text_width = source.w; _text_height = source.h;
+
+	SDL_SetRenderTarget(_renderer, nullptr);
 	return false;
 }
 
@@ -68,4 +69,24 @@ void ScrollableText::move_text_y(double y_diff)
 		_text_y = 0;
 	else if (_text_y < _height - _text_height)
 		_text_y = _height - _text_height;		
+}
+
+bool ScrollableText::load_font_texture(const std::string filename)
+{
+	SDL_Surface *surface = IMG_Load(filename.c_str());
+	if (surface == nullptr) {
+		printf("Load image error: %s\n", IMG_GetError());
+	}
+	else {		
+		//SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 0, 0));		
+		_font = SDL_CreateTextureFromSurface(_renderer, surface);		
+		SDL_FreeSurface(surface);
+		if (_font == nullptr) {
+			printf("Create texture from surface error: %s\n", SDL_GetError());
+		}
+		else {
+			return true;
+		}		
+	}
+	return false;
 }

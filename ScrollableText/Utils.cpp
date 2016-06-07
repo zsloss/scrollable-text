@@ -7,9 +7,9 @@
 
 namespace utils {
 
-	std::unordered_map<char, SDL_Rect> get_glyph_coords(const char* filename) {
+	std::unordered_map<char, SDL_Rect> get_glyph_coords(const std::string filename) {
 		std::string line;
-		std::ifstream file(filename);
+		std::ifstream file(filename.c_str());
 
 		std::unordered_map<char, SDL_Rect> char_map;
 		if (file.is_open()) {
