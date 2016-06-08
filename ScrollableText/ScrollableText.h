@@ -3,6 +3,7 @@
 #include <string>
 #include <SDL.h>
 #include <unordered_map>
+#include "Utils.h"
 
 class ScrollableText : public IWidget
 {
@@ -22,5 +23,5 @@ private:
 	SDL_Texture *_texture;
 	SDL_Texture *_font;
 	bool load_font_texture(const std::string filename);
-	std::unordered_map<char, SDL_Rect> _font_coords;
+	utils::Font_info _font_info;
 };

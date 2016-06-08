@@ -4,6 +4,17 @@
 
 namespace utils {
 
-	std::unordered_map<char, SDL_Rect> get_glyph_coords(const std::string filename);
+	class Font_info {
+	public:
+		class Glyph_info {
+		public:
+			SDL_Rect sourceRect;
+			int xoffset, yoffset, xadvance;
+		};
+		int line_height;
+		std::unordered_map<char, Glyph_info> glyph_info;
+	};	
+
+	Font_info get_font_info(const std::string filename);
 
 }

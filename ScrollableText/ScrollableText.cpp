@@ -10,7 +10,7 @@ ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, i
 	_texture = nullptr;
 	_font = nullptr;
 	load_font_texture(font + ".png");
-	_font_coords = utils::get_glyph_coords(font + ".fnt");
+	_font_info = utils::get_font_info(font + ".fnt");
 }
 
 ScrollableText::~ScrollableText()
@@ -48,16 +48,23 @@ void ScrollableText::set_text(std::string text)
 }
 
 bool ScrollableText::get_texture(std::string text) {
-	SDL_Rect source = _font_coords['C'];
-	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, source.w, source.h);
+	std::string dummy = "Test";
+
+	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 	SDL_SetRenderTarget(_renderer, _texture);
-
-	SDL_Rect dest = { 0,0,source.w, source.h };
 	SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderFillRect(_renderer, &dest);
-	SDL_RenderCopy(_renderer, _font, &source, &dest);
-	_text_width = source.w; _text_height = source.h;
+	SDL_Rect whole = { 0,0,_width, _height };
+	SDL_RenderFillRect(_renderer, &whole);
+	int xPos = 0, yPos = 0;
+	_text_height = _height;
+	_text_width = _width;
+	for (auto it = dummy.begin(); it != dummy.end(); it++) {
+		SDL_Rect source = _font_info.glyph_info[*it].sourceRect;
 
+		SDL_Rect dest = { xPos + _font_info.glyph_info[*it].xoffset, yPos + _font_info.glyph_info[*it].yoffset, source.w, source.h };
+		SDL_RenderCopy(_renderer, _font, &source, &dest);
+		xPos += _font_info.glyph_info[*it].xadvance;
+	}
 	SDL_SetRenderTarget(_renderer, nullptr);
 	return false;
 }
@@ -77,8 +84,7 @@ bool ScrollableText::load_font_texture(const std::string filename)
 	if (surface == nullptr) {
 		printf("Load image error: %s\n", IMG_GetError());
 	}
-	else {		
-		//SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 0, 0));		
+	else {			
 		_font = SDL_CreateTextureFromSurface(_renderer, surface);		
 		SDL_FreeSurface(surface);
 		if (_font == nullptr) {
