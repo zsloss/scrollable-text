@@ -1,37 +1,68 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <regex>
 #include <unordered_map>
 #include <SDL.h>
 #include "Utils.h"
+#include <sstream>
 
-namespace utils {
+namespace utils {	
+	
+	int get_next_value(std::string &line, std::string::const_iterator &it) {
+
+		// Move to the next '='
+		while (it != line.cend() && *it != '=') {			
+			++it;
+		}
+
+		if (it == line.cend()) {
+			throw "Iterator past end of line";
+		}
+
+		// Move to the integer value
+		++it; 
+
+		std::ostringstream ss;
+		while (it != line.cend() && *it != ' ') {
+			ss << *it++;
+		}
+
+		return stoi(ss.str());
+	}
 
 	Font_info get_font_info(const std::string filename) {
+
+		static std::unordered_map<std::string, Font_info> cache;
+		if (cache.find(filename) != cache.end()) {
+			return cache[filename];
+		}
+
 		std::string line;
 		std::ifstream file(filename.c_str());
 
 		Font_info font_info;
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
-				std::smatch match;
-				if (std::regex_search(line, match, std::regex(R"(^char\s+id=(-?\d+)\s+x=(-?\d+)\s+y=(-?\d+)\s+width=(-?\d+)\s+height=(-?\d+)\s+xoffset=(-?\d+)\s+yoffset=(-?\d+)\s+xadvance=(-?\d+))"))) {
+				
+				if (line.substr(0, 2) == "co") { // "common"
+					auto it = line.cbegin();
+					font_info.line_height = get_next_value(line, it);
+				}
 
-					char glyph = static_cast<char>(stoi(match[1]));
-					int x = stoi(match[2]), y = stoi(match[3]),
-						w = stoi(match[4]), h = stoi(match[5]),
-						xoffset = stoi(match[6]), yoffset = stoi(match[7]),
-						xadvance = stoi(match[8]);
+				if (line.substr(0, 5) == "char ") {
+					auto it = line.cbegin();					
 
-					font_info.glyph_info[glyph].sourceRect = { x, y, w, h };
-					font_info.glyph_info[glyph].xoffset = xoffset;
-					font_info.glyph_info[glyph].yoffset = yoffset;
-					font_info.glyph_info[glyph].xadvance = xadvance;
+					char glyph = static_cast<char>(get_next_value(line, it));
+
+					font_info.glyph_info[glyph].sourceRect = { get_next_value(line, it), get_next_value(line, it), get_next_value(line, it), get_next_value(line, it) };
+					font_info.glyph_info[glyph].xoffset = get_next_value(line, it);
+					font_info.glyph_info[glyph].yoffset = get_next_value(line, it);
+					font_info.glyph_info[glyph].xadvance = get_next_value(line, it);
 				}
 			}
 		}
 
+		cache[filename] = font_info;
 		return font_info;
 	}
 
