@@ -48,8 +48,10 @@ void ScrollableText::set_text(std::string text)
 }
 
 bool ScrollableText::get_texture(std::string text) {
-	std::string dummy = "Test";
+	
 
+	auto lines = utils::get_wrapped_lines(text, _width, _font_info);
+	std::string dummy = lines[0];
 	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 	SDL_SetRenderTarget(_renderer, _texture);
 	SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -58,7 +60,7 @@ bool ScrollableText::get_texture(std::string text) {
 	int xPos = 0, yPos = 0;
 	_text_height = _height;
 	_text_width = _width;
-	for (auto it = dummy.begin(); it != dummy.end(); it++) {
+	for (auto it = dummy.begin(); it != dummy.end(); ++it) {
 		SDL_Rect source = _font_info.glyph_info[*it].sourceRect;
 
 		SDL_Rect dest = { xPos + _font_info.glyph_info[*it].xoffset, yPos + _font_info.glyph_info[*it].yoffset, source.w, source.h };

@@ -6,12 +6,60 @@
 #include "Utils.h"
 #include <sstream>
 
-namespace utils {	
-	
+namespace utils {
+
+	std::vector<std::string> utils::split(std::string input, char delimiter) {
+		std::vector<std::string> ret;
+		std::istringstream ss(input);
+		std::string elem;
+		while (std::getline(ss, elem, delimiter)) {
+			ret.push_back(elem);
+		}
+
+		return ret;
+	}
+
+	std::vector<std::string> get_wrapped_lines(std::string &input, int width, Font_info &font_info) {
+		std::vector<std::string> lines;
+		int x = 0;
+		std::string::const_iterator end_of_word, start_of_line, undefined = input.cend();
+		for (auto it = start_of_line = input.cbegin(); it != input.cend(); ++it) {
+
+			if (*it == '\n') {
+				lines.push_back(std::string(start_of_line, it));
+				start_of_line = it + 1;
+				end_of_word = undefined;
+				x = 0;
+			}
+			if (*it == ' ') {
+				end_of_word = it;
+			}
+			else {
+				x += font_info.glyph_info[*it].xadvance;
+				if (x >= width) {
+					if (end_of_word != undefined) {
+						lines.push_back(std::string(start_of_line, end_of_word));
+						it = start_of_line = end_of_word + 1;
+						x = 0;
+					}
+					else {
+						lines.push_back(std::string(start_of_line, it));
+						start_of_line = it;
+						x = 0;
+					}
+					end_of_word = undefined;
+				}
+			}
+		}
+		lines.push_back(std::string(start_of_line, input.cend()));
+
+		return lines;
+	}
+
 	int get_next_value(std::string &line, std::string::const_iterator &it) {
 
 		// Move to the next '='
-		while (it != line.cend() && *it != '=') {			
+		while (it != line.cend() && *it != '=') {
 			++it;
 		}
 
@@ -20,11 +68,11 @@ namespace utils {
 		}
 
 		// Move to the integer value
-		++it; 
+		++it;
 
 		std::ostringstream ss;
 		while (it != line.cend() && *it != ' ') {
-			ss << *it++;
+			ss << *(it++);
 		}
 
 		return stoi(ss.str());
@@ -43,14 +91,14 @@ namespace utils {
 		Font_info font_info;
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
-				
+
 				if (line.substr(0, 2) == "co") { // "common"
 					auto it = line.cbegin();
 					font_info.line_height = get_next_value(line, it);
 				}
 
 				if (line.substr(0, 5) == "char ") {
-					auto it = line.cbegin();					
+					auto it = line.cbegin();
 
 					char glyph = static_cast<char>(get_next_value(line, it));
 
