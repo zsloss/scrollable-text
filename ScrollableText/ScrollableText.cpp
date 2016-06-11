@@ -47,27 +47,43 @@ void ScrollableText::set_text(std::string text)
 	_text_x = _text_y = 0;
 }
 
-bool ScrollableText::get_texture(std::string text) {
-	
+bool ScrollableText::get_texture(std::string text) {	
 
 	auto lines = utils::get_wrapped_lines(text, _width, _font_info);
-	std::string dummy = lines[0];
-	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
-	SDL_SetRenderTarget(_renderer, _texture);
-	SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_Rect whole = { 0,0,_width, _height };
-	SDL_RenderFillRect(_renderer, &whole);
-	int xPos = 0, yPos = 0;
-	_text_height = _height;
-	_text_width = _width;
-	for (auto it = dummy.begin(); it != dummy.end(); ++it) {
-		SDL_Rect source = _font_info.glyph_info[*it].sourceRect;
 
-		SDL_Rect dest = { xPos + _font_info.glyph_info[*it].xoffset, yPos + _font_info.glyph_info[*it].yoffset, source.w, source.h };
-		SDL_RenderCopy(_renderer, _font, &source, &dest);
-		xPos += _font_info.glyph_info[*it].xadvance;
+	auto line_height = _font_info.line_height;
+	_text_height = lines.size() * line_height;
+	_text_width = _width;
+
+	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _text_width, _text_height);
+
+	if (_texture != nullptr) {
+		// Prepare the texture
+		SDL_SetRenderTarget(_renderer, _texture);
+		SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_Rect whole = { 0,0, _text_width, _text_height };
+		SDL_RenderFillRect(_renderer, &whole);
+
+		int xPos = 0, yPos = 0;
+		for (auto lines_it = lines.cbegin(); lines_it != lines.cend(); ++lines_it) {
+			auto line = *lines_it;
+			for (auto string_it = line.cbegin(); string_it != line.cend(); ++string_it) {
+				auto info = _font_info.glyph_info[*string_it];
+
+				SDL_Rect source = info.sourceRect;
+				SDL_Rect dest = { xPos + info.xoffset, yPos + info.yoffset, source.w, source.h };
+
+				SDL_RenderCopy(_renderer, _font, &source, &dest);
+				xPos += info.xadvance;
+			}
+
+			xPos = 0; yPos += line_height;
+		}
+
+		SDL_SetRenderTarget(_renderer, nullptr);
+		return true;
 	}
-	SDL_SetRenderTarget(_renderer, nullptr);
+
 	return false;
 }
 

@@ -5,7 +5,7 @@
 #include <memory>
 #include <SDL_image.h>
 
-const int SCREEN_WIDTH = 400, SCREEN_HEIGHT = 300;
+const int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 300;
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
@@ -97,5 +97,5 @@ void cleanup() {
 }
 
 std::string get_lorem_ipsum() {
-	return "Philosophy being nothing else but THE STUDY OF WISDOM AND TRUTH, it may with reason be expected that those who have spent most time and pains in it should enjoy a greater calm and serenity of mind, a greater clearness and evidence of knowledge, and be less disturbed with doubts and difficulties than other men. Yet so it is, we see the illiterate bulk of mankind that walk the high - road of plain common sense, and are governed by the dictates of nature, for the most part easy and undisturbed. To them nothing THAT IS FAMILIAR appears unaccountable or difficult to comprehend. They complain not of any want of evidence in their senses, and are out of all danger of becoming SCEPTICS.But no sooner do we depart from sense and instinct to follow the light of a superior principle, to reason, meditate, and reflect on the nature of things, but a thousand scruples spring up in our minds concerning those things which before we seemed fully to comprehend. Prejudices and errors of sense do from all parts discover themselves to our view; and, endeavouring to correct these by reason, we are insensibly drawn into uncouth paradoxes, difficulties, and inconsistencies, which multiply and grow upon us as we advance in speculation, till at length, having wandered through many intricate mazes, we find ourselves just where we were, or, which is worse, sit down in a forlorn Scepticism.";
+	return "Philosophy being nothing else but THE STUDY OF WISDOM AND TRUTH, it may with reason be expected that those who have spent most time and pains in it should enjoy a greater calm and serenity of mind, a greater clearness and evidence of knowledge, and be less disturbed with doubts and difficulties than other men. Yet so it is, we see the illiterate bulk of mankind that walk the high - road of plain common sense, and are governed by the dictates of nature, for the most part easy and undisturbed. To them nothing THAT IS FAMILIAR appears unaccountable or difficult to comprehend. They complain not of any want of evidence in their senses, and are out of all danger of becoming SCEPTICS. But no sooner do we depart from sense and instinct to follow the light of a superior principle, to reason, meditate, and reflect on the nature of things, but a thousand scruples spring up in our minds concerning those things which before we seemed fully to comprehend. Prejudices and errors of sense do from all parts discover themselves to our view; and, endeavouring to correct these by reason, we are insensibly drawn into uncouth paradoxes, difficulties, and inconsistencies, which multiply and grow upon us as we advance in speculation, till at length, having wandered through many intricate mazes, we find ourselves just where we were, or, which is worse, sit down in a forlorn Scepticism.";
 }

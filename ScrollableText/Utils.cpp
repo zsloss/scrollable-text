@@ -29,10 +29,11 @@ namespace utils {
 				lines.push_back(std::string(start_of_line, it));
 				start_of_line = it + 1;
 				end_of_word = undefined;
-				x = 0;
+				x = font_info.glyph_info[*it].xadvance;
 			}
 			if (*it == ' ') {
 				end_of_word = it;
+				x += font_info.glyph_info[*it].xadvance;
 			}
 			else {
 				x += font_info.glyph_info[*it].xadvance;
@@ -40,12 +41,12 @@ namespace utils {
 					if (end_of_word != undefined) {
 						lines.push_back(std::string(start_of_line, end_of_word));
 						it = start_of_line = end_of_word + 1;
-						x = 0;
+						x = font_info.glyph_info[*it].xadvance;
 					}
 					else {
 						lines.push_back(std::string(start_of_line, it));
 						start_of_line = it;
-						x = 0;
+						x = font_info.glyph_info[*it].xadvance;
 					}
 					end_of_word = undefined;
 				}
