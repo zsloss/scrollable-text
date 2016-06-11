@@ -27,13 +27,13 @@ int main(int argc, char* argv[]) {
 	SDL_Event e;
 	if (init()) {
 		while (!quit) {
-			int mousewheel = 0;
+			int mousewheel = 0, mx = -1, my = -1;
+			bool clicked = false;
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
 					quit = true;
 				}
 				else if (e.type == SDL_MOUSEMOTION) {
-					int mx, my;
 					SDL_GetMouseState(&mx, &my);
 					if (my > 0 && my < SCREEN_HEIGHT)
 						if (mx > 0 && mx < SCREEN_WIDTH / 2) {
@@ -44,16 +44,21 @@ int main(int argc, char* argv[]) {
 						}
 					else { in_1 = false; in_2 = false; }
 				}
-				else if (e.type == SDL_MOUSEWHEEL)
+				else if (e.type == SDL_MOUSEBUTTONDOWN) {					
+					SDL_GetMouseState(&mx, &my);
+					clicked = true;
+				}
+				else if (e.type == SDL_MOUSEWHEEL) {
 					mousewheel = e.wheel.y;
+				}
 			}
 
 			const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
 			if (in_1)
-				scrollable_text1->update(keystate, mousewheel);
+				scrollable_text1->update(keystate, mx, my, clicked, mousewheel);
 			else if (in_2)
-				scrollable_text2->update(keystate, mousewheel);
+				scrollable_text2->update(keystate, mx - SCREEN_WIDTH /2, my, clicked, mousewheel);
 
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
@@ -97,5 +102,5 @@ void cleanup() {
 }
 
 std::string get_lorem_ipsum() {
-	return "Philosophy being nothing else but THE STUDY OF WISDOM AND TRUTH, it may with reason be expected that those who have spent most time and pains in it should enjoy a greater calm and serenity of mind, a greater clearness and evidence of knowledge, and be less disturbed with doubts and difficulties than other men. Yet so it is, we see the illiterate bulk of mankind that walk the high - road of plain common sense, and are governed by the dictates of nature, for the most part easy and undisturbed. To them nothing THAT IS FAMILIAR appears unaccountable or difficult to comprehend. They complain not of any want of evidence in their senses, and are out of all danger of becoming SCEPTICS. But no sooner do we depart from sense and instinct to follow the light of a superior principle, to reason, meditate, and reflect on the nature of things, but a thousand scruples spring up in our minds concerning those things which before we seemed fully to comprehend. Prejudices and errors of sense do from all parts discover themselves to our view; and, endeavouring to correct these by reason, we are insensibly drawn into uncouth paradoxes, difficulties, and inconsistencies, which multiply and grow upon us as we advance in speculation, till at length, having wandered through many intricate mazes, we find ourselves just where we were, or, which is worse, sit down in a forlorn Scepticism.";
+	return "Philosophy being nothing else but THE <STUDY> OF WISDOM AND TRUTH, it may with reason be expected that those who have spent most time and pains in it should enjoy a greater calm and serenity of mind, a greater clearness and evidence of knowledge, and be less disturbed with doubts and difficulties than other men. Yet so it is, we see the illiterate bulk of mankind that walk the high - road of plain common sense, and are governed by the dictates of nature, for the most part easy and <undisturbed>. To them nothing THAT IS FAMILIAR appears unaccountable or difficult to comprehend. They complain not of any want of evidence in their senses, and are out of all danger of becoming SCEPTICS. But no sooner do we depart from sense and instinct to follow the light of a superior principle, to reason, meditate, and reflect on the nature of things, but a thousand scruples spring up in our minds concerning those things which before we seemed fully to comprehend. Prejudices and errors of sense do from all parts discover themselves to our view; and, endeavouring to correct these by reason, we are insensibly drawn into uncouth paradoxes, difficulties, and inconsistencies, which multiply and grow upon us as we advance in speculation, till at length, having wandered through many intricate mazes, we find ourselves just where we were, or, which is worse, sit down in a forlorn Scepticism.";
 }

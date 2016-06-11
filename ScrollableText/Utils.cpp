@@ -31,9 +31,11 @@ namespace utils {
 				end_of_word = undefined;
 				x = font_info.glyph_info[*it].xadvance;
 			}
-			if (*it == ' ') {
+			else if (*it == ' ') {
 				end_of_word = it;
 				x += font_info.glyph_info[*it].xadvance;
+			}
+			else if (*it == '<' || *it == '>') {
 			}
 			else {
 				x += font_info.glyph_info[*it].xadvance;

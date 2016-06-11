@@ -4,13 +4,14 @@
 #include <SDL.h>
 #include <unordered_map>
 #include "Utils.h"
+#include <vector>
 
 class ScrollableText : public IWidget
 {
 public:
 	ScrollableText(SDL_Renderer *renderer, const std::string font, int width, int height);
 	virtual ~ScrollableText();
-	virtual void update(const Uint8 *keystate, int mousewheel);
+	virtual void update(const Uint8 *keystate, int mouse_x, int mouse_y, bool clicked, int mousewheel);
 	virtual void render(int x_pos, int y_pos);
 	virtual void set_text(std::string text);
 private:
@@ -24,4 +25,5 @@ private:
 	SDL_Texture *_font;
 	bool load_font_texture(const std::string filename);
 	utils::Font_info _font_info;
+	std::vector<SDL_Rect> _links;
 };

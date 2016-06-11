@@ -19,7 +19,7 @@ ScrollableText::~ScrollableText()
 	_texture = nullptr;
 }
 
-void ScrollableText::update(const Uint8 *keystate, int mousewheel)
+void ScrollableText::update(const Uint8 *keystate, int mouse_x, int mouse_y, bool clicked, int mousewheel)
 {
 	if (keystate[SDL_SCANCODE_DOWN])
 		move_text_y(-0.05);
@@ -27,6 +27,14 @@ void ScrollableText::update(const Uint8 *keystate, int mousewheel)
 		move_text_y(0.05);
 	if (mousewheel != 0)
 	move_text_y(mousewheel * 30);
+	if (clicked) {
+		for (auto it = _links.cbegin(); it != _links.cend(); ++it) {
+			auto link = *it;
+			if (mouse_x >= link.x && mouse_x <= link.x + link.w && mouse_y >= link.y + _text_y && mouse_y <= link.y + _text_y + link.h) {
+				printf("Link clicked!\n");
+			}
+		}
+	}
 }
 
 void ScrollableText::render(int x_pos, int y_pos)
@@ -67,14 +75,35 @@ bool ScrollableText::get_texture(std::string text) {
 		int xPos = 0, yPos = 0;
 		for (auto lines_it = lines.cbegin(); lines_it != lines.cend(); ++lines_it) {
 			auto line = *lines_it;
+			bool in_link = false;
+			SDL_Rect temp_link;
+			SDL_SetTextureColorMod(_font, 0, 0, 0);
 			for (auto string_it = line.cbegin(); string_it != line.cend(); ++string_it) {
-				auto info = _font_info.glyph_info[*string_it];
 
-				SDL_Rect source = info.sourceRect;
-				SDL_Rect dest = { xPos + info.xoffset, yPos + info.yoffset, source.w, source.h };
+				if (*string_it == '<') {
+					in_link = true;
+					SDL_SetTextureColorMod(_font, 0xFF, 0, 0);
+					temp_link = { xPos, yPos, 0, line_height };
+				}
+				else if (*string_it == '>') {
+					if (in_link) {
+						_links.push_back(temp_link);
+						SDL_SetTextureColorMod(_font, 0, 0, 0);
+					}
+					in_link = false;
+				}
+				else {
+					auto info = _font_info.glyph_info[*string_it];
 
-				SDL_RenderCopy(_renderer, _font, &source, &dest);
-				xPos += info.xadvance;
+					SDL_Rect source = info.sourceRect;
+					SDL_Rect dest = { xPos + info.xoffset, yPos + info.yoffset, source.w, source.h };
+
+					SDL_RenderCopy(_renderer, _font, &source, &dest);
+					xPos += info.xadvance;
+
+					if (in_link)
+						temp_link.w += info.xadvance;
+				}
 			}
 
 			xPos = 0; yPos += line_height;
