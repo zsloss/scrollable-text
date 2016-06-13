@@ -4,12 +4,14 @@
 #include "ScrollableText.h"
 #include <memory>
 #include <SDL_image.h>
+#include "InputManager.h"
 
 const int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 300;
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_Texture *texture = nullptr;
+std::shared_ptr<InputManager> input_manager;
 std::shared_ptr<ScrollableText> scrollable_text1;
 std::shared_ptr<ScrollableText> scrollable_text2;
 
@@ -21,50 +23,25 @@ int main(int argc, char* argv[]) {
 	printf("App started!\n");
 
 	bool quit = false;
-	bool in_1 = false, in_2 = false;
 
-
+	
 	SDL_Event e;
 	if (init()) {
 		while (!quit) {
-			int mousewheel = 0, mx = -1, my = -1;
-			bool clicked = false;
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
 					quit = true;
 				}
-				else if (e.type == SDL_MOUSEMOTION) {
-					SDL_GetMouseState(&mx, &my);
-					if (my > 0 && my < SCREEN_HEIGHT)
-						if (mx > 0 && mx < SCREEN_WIDTH / 2) {
-							in_1 = true; in_2 = false;
-						}
-						else {
-							in_1 = false; in_2 = true;
-						}
-					else { in_1 = false; in_2 = false; }
-				}
-				else if (e.type == SDL_MOUSEBUTTONDOWN) {					
-					SDL_GetMouseState(&mx, &my);
-					clicked = true;
-				}
-				else if (e.type == SDL_MOUSEWHEEL) {
-					mousewheel = e.wheel.y;
+				else {
+					input_manager->process_event(&e);
 				}
 			}
-
-			const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-
-			if (in_1)
-				scrollable_text1->update(keystate, mx, my, clicked, mousewheel);
-			else if (in_2)
-				scrollable_text2->update(keystate, mx - SCREEN_WIDTH /2, my, clicked, mousewheel);
 
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
 
-			scrollable_text1->render(0, 0);
-			scrollable_text2->render(SCREEN_WIDTH / 2, 0);
+			scrollable_text1->render();
+			scrollable_text2->render();
 
 			SDL_RenderPresent(renderer);
 		}
@@ -80,10 +57,13 @@ bool init() {
 			if (renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {
 				int imgFlags = IMG_INIT_PNG;
 				if (IMG_Init(imgFlags) & imgFlags)	{
-					scrollable_text1 = std::make_shared<ScrollableText>(renderer, "nova", SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+					input_manager = std::make_shared<InputManager>();
+					scrollable_text1 = std::make_shared<ScrollableText>(renderer, "nova", 0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
 					scrollable_text1->set_text(get_lorem_ipsum());
-					scrollable_text2 = std::make_shared<ScrollableText>(renderer, "nova", SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+					scrollable_text2 = std::make_shared<ScrollableText>(renderer, "nova", SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
 					scrollable_text2->set_text(get_lorem_ipsum());
+					input_manager->add_widget(scrollable_text1);
+					input_manager->add_widget(scrollable_text2);
 					return true;
 				}
 				else printf("IMG_Init error: %s\n", IMG_GetError());

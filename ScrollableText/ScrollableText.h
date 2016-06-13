@@ -9,11 +9,13 @@
 class ScrollableText : public IWidget
 {
 public:
-	ScrollableText(SDL_Renderer *renderer, const std::string font, int width, int height);
+	ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height);
 	virtual ~ScrollableText();
-	virtual void update(const Uint8 *keystate, int mouse_x, int mouse_y, bool clicked, int mousewheel);
-	virtual void render(int x_pos, int y_pos);
+	virtual void render();
 	virtual void set_text(std::string text);
+	virtual void scroll_up();
+	virtual void scroll_down();
+	virtual void click(int x, int y);
 private:
 	bool get_texture(std::string text);
 	void move_text_y(double y);

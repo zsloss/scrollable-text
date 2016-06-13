@@ -4,7 +4,7 @@
 #include <SDL_image.h>
 #include "Utils.h"
 
-ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int width, int height) : IWidget(width, height)
+ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height) : IWidget(x_pos, y_pos, width, height)
 {
 	_renderer = renderer;
 	_texture = nullptr;
@@ -19,27 +19,9 @@ ScrollableText::~ScrollableText()
 	_texture = nullptr;
 }
 
-void ScrollableText::update(const Uint8 *keystate, int mouse_x, int mouse_y, bool clicked, int mousewheel)
+void ScrollableText::render()
 {
-	if (keystate[SDL_SCANCODE_DOWN])
-		move_text_y(-0.05);
-	if (keystate[SDL_SCANCODE_UP])
-		move_text_y(0.05);
-	if (mousewheel != 0)
-	move_text_y(mousewheel * 30);
-	if (clicked) {
-		for (auto it = _links.cbegin(); it != _links.cend(); ++it) {
-			auto link = *it;
-			if (mouse_x >= link.x && mouse_x <= link.x + link.w && mouse_y >= link.y + _text_y && mouse_y <= link.y + _text_y + link.h) {
-				printf("Link clicked!\n");
-			}
-		}
-	}
-}
-
-void ScrollableText::render(int x_pos, int y_pos)
-{
-	SDL_Rect viewport{x_pos, y_pos, _width, _height};
+	SDL_Rect viewport{_x, _y, _width, _height};
 	SDL_RenderSetViewport(_renderer, &viewport);
 
 	if (_texture != nullptr) {
@@ -142,4 +124,24 @@ bool ScrollableText::load_font_texture(const std::string filename)
 		}		
 	}
 	return false;
+}
+
+void ScrollableText::scroll_up() {
+	move_text_y(30);
+}
+
+void ScrollableText::scroll_down() {
+	move_text_y(-30);
+}
+
+void ScrollableText::click(int x, int y) {
+	x -= _x;
+	y -= _y;
+
+	for (auto it = _links.cbegin(); it != _links.cend(); ++it) {
+		auto link = *it;
+		if (x >= link.x && x <= link.x + link.w && y >= link.y + _text_y && y <= link.y + _text_y + link.h) {
+			printf("Link clicked!\n");
+		}
+	}
 }
