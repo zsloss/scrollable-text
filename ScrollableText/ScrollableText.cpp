@@ -1,16 +1,11 @@
 #include "IWidget.h"
 #include "ScrollableText.h"
 #include <SDL.h>
-#include <SDL_image.h>
 #include "Utils.h"
 
-ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height) : IWidget(x_pos, y_pos, width, height)
+ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height) 
+	: IWidget(x_pos, y_pos, width, height), _renderer(renderer), _texture(nullptr), _font(Font::get_font(font, renderer))
 {
-	_renderer = renderer;
-	_texture = nullptr;
-	_font = nullptr;
-	load_font_texture(font + ".png");
-	_font_info = utils::get_font_info(font + ".fnt");
 }
 
 ScrollableText::~ScrollableText()
@@ -39,9 +34,9 @@ void ScrollableText::set_text(std::string text)
 
 bool ScrollableText::get_texture(std::string text) {	
 
-	auto lines = utils::get_wrapped_lines(text, _width, _font_info);
+	auto lines = _font->get_wrapped_lines(text, _width);
 
-	auto line_height = _font_info.line_height;
+	auto line_height = _font->get_line_height();
 	_text_height = lines.size() * line_height;
 	_text_width = _width;
 
@@ -59,32 +54,27 @@ bool ScrollableText::get_texture(std::string text) {
 			auto line = *lines_it;
 			bool in_link = false;
 			SDL_Rect temp_link;
-			SDL_SetTextureColorMod(_font, 0, 0, 0);
+			_font->set_colour(0, 0, 0);
 			for (auto string_it = line.cbegin(); string_it != line.cend(); ++string_it) {
 
 				if (*string_it == '<') {
 					in_link = true;
-					SDL_SetTextureColorMod(_font, 0xFF, 0, 0);
+					_font->set_colour(0xFF, 0, 0);
 					temp_link = { xPos, yPos, 0, line_height };
 				}
 				else if (*string_it == '>') {
 					if (in_link) {
 						_links.push_back(temp_link);
-						SDL_SetTextureColorMod(_font, 0, 0, 0);
+						_font->set_colour(0, 0, 0);
 					}
 					in_link = false;
 				}
 				else {
-					auto info = _font_info.glyph_info[*string_it];
-
-					SDL_Rect source = info.sourceRect;
-					SDL_Rect dest = { xPos + info.xoffset, yPos + info.yoffset, source.w, source.h };
-
-					SDL_RenderCopy(_renderer, _font, &source, &dest);
-					xPos += info.xadvance;
+					_font->render_char(*string_it, xPos, yPos);
+					xPos += _font->get_xadvance(*string_it);
 
 					if (in_link)
-						temp_link.w += info.xadvance;
+						temp_link.w += _font->get_xadvance(*string_it);
 				}
 			}
 
@@ -105,25 +95,6 @@ void ScrollableText::move_text_y(double y_diff)
 		_text_y = 0;
 	else if (_text_y < _height - _text_height)
 		_text_y = _height - _text_height;		
-}
-
-bool ScrollableText::load_font_texture(const std::string filename)
-{
-	SDL_Surface *surface = IMG_Load(filename.c_str());
-	if (surface == nullptr) {
-		printf("Load image error: %s\n", IMG_GetError());
-	}
-	else {			
-		_font = SDL_CreateTextureFromSurface(_renderer, surface);		
-		SDL_FreeSurface(surface);
-		if (_font == nullptr) {
-			printf("Create texture from surface error: %s\n", SDL_GetError());
-		}
-		else {
-			return true;
-		}		
-	}
-	return false;
 }
 
 void ScrollableText::scroll_up() {

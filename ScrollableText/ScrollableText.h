@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include "Utils.h"
 #include <vector>
+#include <memory>
+#include "Font.h"
 
 class ScrollableText : public IWidget
 {
@@ -21,11 +23,8 @@ private:
 	void move_text_y(double y);
 	std::string _text;
 	SDL_Renderer *_renderer;
-	double _text_x, _text_y;
-	int _text_width, _text_height;
+	int _text_x, _text_y, _text_width, _text_height;
 	SDL_Texture *_texture;
-	SDL_Texture *_font;
-	bool load_font_texture(const std::string filename);
-	utils::Font_info _font_info;
 	std::vector<SDL_Rect> _links;
+	std::shared_ptr<Font> _font;
 };
