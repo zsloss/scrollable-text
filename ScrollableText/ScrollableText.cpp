@@ -1,10 +1,10 @@
-#include "IWidget.h"
+#include "Widget.h"
 #include "ScrollableText.h"
 #include <SDL.h>
 #include "Utils.h"
 
 ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height) 
-	: IWidget(x_pos, y_pos, width, height), _renderer(renderer), _texture(nullptr), _font(Font::get_font(font, renderer))
+	: Widget(x_pos, y_pos, width, height), _renderer(renderer), _texture(nullptr), _font(Font::get_font(font, renderer))
 {
 }
 

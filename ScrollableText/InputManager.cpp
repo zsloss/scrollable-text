@@ -40,7 +40,7 @@ void InputManager::process_event(SDL_Event * e)
 	}
 }
 
-void InputManager::add_widget(std::shared_ptr<IWidget> widget)
+void InputManager::add_widget(std::shared_ptr<Widget> widget)
 {
 	widgets.push_back(widget);
 }

@@ -126,7 +126,7 @@
   <ItemGroup>
     <ClInclude Include="Font.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="IWidget.h" />
+    <ClInclude Include="Widget.h" />
     <ClInclude Include="ScrollableText.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

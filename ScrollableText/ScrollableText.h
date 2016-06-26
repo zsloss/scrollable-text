@@ -1,5 +1,5 @@
 #pragma once
-#include "IWidget.h"
+#include "Widget.h"
 #include <string>
 #include <SDL.h>
 #include <unordered_map>
@@ -8,7 +8,7 @@
 #include <memory>
 #include "Font.h"
 
-class ScrollableText : public IWidget
+class ScrollableText : public Widget
 {
 public:
 	ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height);
