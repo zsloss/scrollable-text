@@ -4,7 +4,7 @@
 #include "Utils.h"
 
 ScrollableText::ScrollableText(SDL_Renderer *renderer, const std::string font, int x_pos, int y_pos, int width, int height) 
-	: Widget(x_pos, y_pos, width, height), _renderer(renderer), _texture(nullptr), _font(Font::get_font(font, renderer))
+	: Widget(x_pos, y_pos, width, height), _renderer(renderer), _texture(nullptr), _font(Font::get_font(font, renderer)), _scrollable(false)
 {
 }
 
@@ -45,7 +45,7 @@ bool ScrollableText::get_texture(std::string text) {
 	if (_texture != nullptr) {
 		// Prepare the texture
 		SDL_SetRenderTarget(_renderer, _texture);
-		SDL_SetRenderDrawColor(_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(_renderer, 0,0,0, 0xFF);
 		SDL_Rect whole = { 0,0, _text_width, _text_height };
 		SDL_RenderFillRect(_renderer, &whole);
 
@@ -54,7 +54,7 @@ bool ScrollableText::get_texture(std::string text) {
 			auto line = *lines_it;
 			bool in_link = false;
 			SDL_Rect temp_link;
-			_font->set_colour(0, 0, 0);
+			_font->set_colour(0xFF, 0xFF, 0xFF);
 			for (auto string_it = line.cbegin(); string_it != line.cend(); ++string_it) {
 
 				if (*string_it == '<') {
@@ -65,7 +65,7 @@ bool ScrollableText::get_texture(std::string text) {
 				else if (*string_it == '>') {
 					if (in_link) {
 						_links.push_back(temp_link);
-						_font->set_colour(0, 0, 0);
+						_font->set_colour(0xFF, 0xFF, 0xFF);
 					}
 					in_link = false;
 				}
@@ -81,6 +81,7 @@ bool ScrollableText::get_texture(std::string text) {
 			xPos = 0; yPos += line_height;
 		}
 
+		_scrollable = _text_height > _height; // Only scrollable if needed.
 		SDL_SetRenderTarget(_renderer, nullptr);
 		return true;
 	}
@@ -90,11 +91,13 @@ bool ScrollableText::get_texture(std::string text) {
 
 void ScrollableText::move_text_y(double y_diff)
 {
-	_text_y += y_diff;
-	if (_text_y > 0)
-		_text_y = 0;
-	else if (_text_y < _height - _text_height)
-		_text_y = _height - _text_height;		
+	if (_scrollable) {
+		_text_y += y_diff;
+		if (_text_y > 0)
+			_text_y = 0;
+		else if (_text_y < _height - _text_height)
+			_text_y = _height - _text_height;
+	}
 }
 
 void ScrollableText::scroll_up() {

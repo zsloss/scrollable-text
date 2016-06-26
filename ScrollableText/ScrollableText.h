@@ -21,6 +21,7 @@ public:
 private:
 	bool get_texture(std::string text);
 	void move_text_y(double y);
+	bool _scrollable;
 	std::string _text;
 	SDL_Renderer *_renderer;
 	int _text_x, _text_y, _text_width, _text_height;
