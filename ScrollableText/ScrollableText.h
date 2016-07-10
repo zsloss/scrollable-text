@@ -18,6 +18,8 @@ public:
 	virtual void scroll_up();
 	virtual void scroll_down();
 	virtual void click(int x, int y);
+	virtual void set_link_colour(Uint8 r, Uint8 g, Uint8 b) { link_colour.r = r; link_colour.g = g; link_colour.b = b; }
+
 private:
 	bool get_texture(std::string text);
 	void move_text_y(double y);
@@ -28,4 +30,6 @@ private:
 	SDL_Texture *_texture;
 	std::vector<SDL_Rect> _links;
 	std::shared_ptr<Font> _font;
+	Colour link_colour;
+	int _texture_height;
 };
